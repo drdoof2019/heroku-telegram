@@ -32,27 +32,44 @@ while True:
         #print("mem_elem",mem_elem)
         for data_elem in datas:
             #print("data_elem",data_elem)
+            fiyat_dustu = False
+            fiyat_yukseldi = False
+            volum_dustu = False
+            volum_yukseldi = False
+
             if data_elem['symbol'] in mem_elem:
+
                 if float(data_elem['lastPrice'])*1.01 < float(mem_elem[1]): # 1%'den fazla düşmüş
-                    caption = f"{data_elem['symbol']}:{mem_elem[0]} FİYATı son taramaya göre %1'den fazla DÜŞTÜ. Eski Fiyat:{mem_elem[1]}, Yeni Fiyat:{data_elem['lastPrice']}"
-                    print(caption)
-                    caption = caption.replace(".","\.")
-                    telegram_ops.send_text_to_telegram(caption)
+                    #caption = f"{data_elem['symbol']}:{mem_elem[0]} FİYATı son taramaya göre %1'den fazla DÜŞTÜ. Eski Fiyat:{mem_elem[1]}, Yeni Fiyat:{data_elem['lastPrice']}"
+                    #print(caption)
+                    #caption = caption.replace(".","\.")
+                    #telegram_ops.send_text_to_telegram(caption)
+                    fiyat_dustu = True
                 if float(data_elem['lastPrice'])*0.99 > float(mem_elem[1]): # 1%'den fazla yükselmiş
-                    caption = f"{data_elem['symbol']}:{mem_elem[0]} FİYATı son taramaya göre %1'den fazla YÜKSELDİ. Eski Fiyat:{mem_elem[1]}, Yeni Fiyat:{data_elem['lastPrice']}"
-                    print(caption)
-                    caption = caption.replace(".","\.")
-                    telegram_ops.send_text_to_telegram(caption)
+                    # caption = f"{data_elem['symbol']}:{mem_elem[0]} FİYATı son taramaya göre %1'den fazla YÜKSELDİ. Eski Fiyat:{mem_elem[1]}, Yeni Fiyat:{data_elem['lastPrice']}"
+                    # print(caption)
+                    # caption = caption.replace(".","\.")
+                    # telegram_ops.send_text_to_telegram(caption)
+                    fiyat_yukseldi = True
 
                 if float(data_elem['volume'])*1.01 < float(mem_elem[2]): # 1%'den fazla düşmüş
-                    caption = f"{data_elem['symbol']}:{mem_elem[0]} VOLUMü son taramaya göre %1'den fazla DÜŞTÜ. Eski Volume:{float(mem_elem[2]):.2f}, Yeni Volume:{float(data_elem['volume']):.2f}"
-                    print(caption)
-                    caption = caption.replace(".","\.")
-                    telegram_ops.send_text_to_telegram(caption)
+                    # caption = f"{data_elem['symbol']}:{mem_elem[0]} VOLUMü son taramaya göre %1'den fazla DÜŞTÜ. Eski Volume:{float(mem_elem[2]):.2f}, Yeni Volume:{float(data_elem['volume']):.2f}"
+                    # print(caption)
+                    # caption = caption.replace(".","\.")
+                    # telegram_ops.send_text_to_telegram(caption)
+                    volum_dustu = True
                 if float(data_elem['volume'])*0.99 > float(mem_elem[2]): # 1%'den fazla yükselmiş
-                    caption = f"{data_elem['symbol']}:{mem_elem[0]} VOLUMü son taramaya göre %1'den fazla YÜKSELDİ. Eski Volume:{float(mem_elem[2]):.2f}, Yeni Volume:{float(data_elem['volume']):.2f}"
-                    print(caption)
-                    caption = caption.replace(".","\.")
+                    # caption = f"{data_elem['symbol']}:{mem_elem[0]} VOLUMü son taramaya göre %1'den fazla YÜKSELDİ. Eski Volume:{float(mem_elem[2]):.2f}, Yeni Volume:{float(data_elem['volume']):.2f}"
+                    # print(caption)
+                    # caption = caption.replace(".","\.")
+                    # telegram_ops.send_text_to_telegram(caption)
+                    volum_yukseldi = True
+
+                if volum_dustu and fiyat_dustu:
+                    caption = f"{data_elem['symbol']} Fiyatı ve Volümü %1'den fazla DÜŞTÜ\.Sanırım bu bir Sat sinyali\."
+                    telegram_ops.send_text_to_telegram(caption)
+                elif volum_yukseldi and fiyat_yukseldi:
+                    caption = f"{data_elem['symbol']} Fiyatı ve Volümü %1'den fazla YÜKSELDİ\.Sanırım bu bir Al sinyali\."
                     telegram_ops.send_text_to_telegram(caption)
                 # print(i)
                 # i+=1
