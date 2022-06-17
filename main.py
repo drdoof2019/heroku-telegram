@@ -66,10 +66,10 @@ while True:
                     volum_yukseldi = True
 
                 if volum_dustu and fiyat_dustu:
-                    caption = f"{data_elem['symbol']} Fiyatı ve Volümü %1'den fazla DÜŞTÜ\.Sanırım bu bir Sat sinyali\."
+                    caption = f"{data_elem['symbol']}: Signal Type:Sell, Price:{data_elem['lastPrice']}, Volume:{float(data_elem['volume']):.2f}"
                     telegram_ops.send_text_to_telegram(caption)
                 elif volum_yukseldi and fiyat_yukseldi:
-                    caption = f"{data_elem['symbol']} Fiyatı ve Volümü %1'den fazla YÜKSELDİ\.Sanırım bu bir Al sinyali\."
+                    caption = f"{data_elem['symbol']}: Signal Type:BUY, Price:{data_elem['lastPrice']}, Volume:{float(data_elem['volume']):.2f}"
                     telegram_ops.send_text_to_telegram(caption)
                 # print(i)
                 # i+=1
