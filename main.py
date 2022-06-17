@@ -21,7 +21,7 @@ for elem in datas:
         #i+=1
 yukselis_orani = 1.005
 dusus_orani = 0.995
-bekleme_suresi = 10
+bekleme_suresi = 5
 while True:
     i=1
     datas.clear()
