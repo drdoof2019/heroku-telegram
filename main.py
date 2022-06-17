@@ -19,8 +19,8 @@ for elem in datas:
 
         #print(i,")",elem['symbol'],elem['lastPrice'],elem['volume'])
         #i+=1
-yukselis_orani = 1.005
-dusus_orani = 0.995
+yukselis_orani = 1.01
+dusus_orani = 0.99
 bekleme_suresi = 5
 while True:
     i=1
@@ -99,8 +99,8 @@ while True:
                         print(caption)
                         caption = caption.replace(".","\.")
                         telegram_ops.send_text_to_telegram(caption)
-            except:
-                pass
+            except Exception as e:
+                print(e)
                 # print(i)
                 # i+=1
                 # print(data_elem['symbol'],mem_elem[0])
