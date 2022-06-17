@@ -73,6 +73,7 @@ while True:
                     caption = caption.replace(".","\.")
                     telegram_ops.send_text_to_telegram(caption)
                 elif volum_yukseldi and fiyat_yukseldi:
+                    baglanti = f"[Follow us on twitter](www.twitter.com)"
                     caption = f"{data_elem['symbol']}: Signal Type:BUY\nPrice:{data_elem['lastPrice']}, PriceChange:%{float(data_elem['lastPrice'])/float(mem_elem[1]):.2f}\nVolume:{float(data_elem['volume']):.2f},VolumeChange:%{float(data_elem['volume'])/float(mem_elem[2]):.2f}\n{baglanti}"
                     print(caption)
                     caption = caption.replace(".","\.")
