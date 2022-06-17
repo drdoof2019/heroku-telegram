@@ -19,12 +19,14 @@ for elem in datas:
 
         #print(i,")",elem['symbol'],elem['lastPrice'],elem['volume'])
         #i+=1
-
+yukselis_orani = 1.005
+dusus_orani = 0.995
+bekleme_suresi = 10
 while True:
     i=1
     datas.clear()
     #print("sleeep5")
-    time.sleep(5)
+    time.sleep(bekleme_suresi)
     #print("wokeup5")
     datas = get_data()
 
@@ -36,29 +38,28 @@ while True:
             fiyat_yukseldi = False
             volum_dustu = False
             volum_yukseldi = False
-
             if data_elem['symbol'] in mem_elem:
-
-                if float(data_elem['lastPrice'])*1.01 < float(mem_elem[1]): # 1%'den fazla düşmüş
+                #print(data_elem['symbol'],data_elem['lastPrice'],mem_elem[1])
+                if float(data_elem['lastPrice'])*yukselis_orani < float(mem_elem[1]): # 1%'den fazla düşmüş
                     #caption = f"{data_elem['symbol']}:{mem_elem[0]} FİYATı son taramaya göre %1'den fazla DÜŞTÜ. Eski Fiyat:{mem_elem[1]}, Yeni Fiyat:{data_elem['lastPrice']}"
                     #print(caption)
                     #caption = caption.replace(".","\.")
                     #telegram_ops.send_text_to_telegram(caption)
                     fiyat_dustu = True
-                if float(data_elem['lastPrice'])*0.99 > float(mem_elem[1]): # 1%'den fazla yükselmiş
+                if float(data_elem['lastPrice'])*dusus_orani > float(mem_elem[1]): # 1%'den fazla yükselmiş
                     # caption = f"{data_elem['symbol']}:{mem_elem[0]} FİYATı son taramaya göre %1'den fazla YÜKSELDİ. Eski Fiyat:{mem_elem[1]}, Yeni Fiyat:{data_elem['lastPrice']}"
                     # print(caption)
                     # caption = caption.replace(".","\.")
                     # telegram_ops.send_text_to_telegram(caption)
                     fiyat_yukseldi = True
 
-                if float(data_elem['volume'])*1.01 < float(mem_elem[2]): # 1%'den fazla düşmüş
+                if float(data_elem['volume'])*yukselis_orani < float(mem_elem[2]): # 1%'den fazla düşmüş
                     # caption = f"{data_elem['symbol']}:{mem_elem[0]} VOLUMü son taramaya göre %1'den fazla DÜŞTÜ. Eski Volume:{float(mem_elem[2]):.2f}, Yeni Volume:{float(data_elem['volume']):.2f}"
                     # print(caption)
                     # caption = caption.replace(".","\.")
                     # telegram_ops.send_text_to_telegram(caption)
                     volum_dustu = True
-                if float(data_elem['volume'])*0.99 > float(mem_elem[2]): # 1%'den fazla yükselmiş
+                if float(data_elem['volume'])*dusus_orani > float(mem_elem[2]): # 1%'den fazla yükselmiş
                     # caption = f"{data_elem['symbol']}:{mem_elem[0]} VOLUMü son taramaya göre %1'den fazla YÜKSELDİ. Eski Volume:{float(mem_elem[2]):.2f}, Yeni Volume:{float(data_elem['volume']):.2f}"
                     # print(caption)
                     # caption = caption.replace(".","\.")
@@ -66,10 +67,14 @@ while True:
                     volum_yukseldi = True
 
                 if volum_dustu and fiyat_dustu:
-                    caption = f"{data_elem['symbol']}: Signal Type:Sell, Price:{data_elem['lastPrice']}, Volume:{float(data_elem['volume']):.2f}"
+                    caption = f"{data_elem['symbol']}: Signal Type:Sell\nPrice:{data_elem['lastPrice']} PriceChange:%{float(mem_elem[1])/float(data_elem['lastPrice']):.2f}\nVolume:{float(data_elem['volume']):.2f},VolumeChange:%{float(mem_elem[2])/float(data_elem['volume']):.2f}"
+                    print(caption)
+                    caption = caption.replace(".","\.")
                     telegram_ops.send_text_to_telegram(caption)
                 elif volum_yukseldi and fiyat_yukseldi:
-                    caption = f"{data_elem['symbol']}: Signal Type:BUY, Price:{data_elem['lastPrice']}, Volume:{float(data_elem['volume']):.2f}"
+                    caption = f"{data_elem['symbol']}: Signal Type:BUY\nPrice:{data_elem['lastPrice']}, PriceChange:%{float(data_elem['lastPrice'])/float(mem_elem[1]):.2f}\nVolume:{float(data_elem['volume']):.2f},VolumeChange:%{float(mem_elem[2])/float(data_elem['volume']):.2f}"
+                    print(caption)
+                    caption = caption.replace(".","\.")
                     telegram_ops.send_text_to_telegram(caption)
                 # print(i)
                 # i+=1
@@ -78,7 +83,6 @@ while True:
                 # print(data_elem['volume'],mem_elem[2])
                 # print("--------------------------------------------")
                 break
-
     memory_for_USDT.clear()
     for elem in datas:
         if elem['symbol'].endswith('USDT'): #or elem['symbol'].endswith('BUSD'):
