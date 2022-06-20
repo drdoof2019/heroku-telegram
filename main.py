@@ -46,10 +46,16 @@ def share_me(coinname,first_price,first_volume,last_price,last_volume,type):
             print(coinname)
             print("---------------------")
 
-
+def remove_values_from_list(the_list, val):
+    temp_list = []
+    for value in the_list:
+        if value[0] != val:
+            temp_list.append(value)
+    #print("temp_list",temp_list)
+    return temp_list
 
 if __name__ == '__main__':
-
+    #shared = False
     unwanted_symbols = ['SCBTC','GNOBTC','XVGBTC']
     detected_coins_for_sell_signal = []
     detected_coins_for_buy_signal = []
@@ -86,7 +92,7 @@ if __name__ == '__main__':
         #     if data['symbol'] == 'BTCUSDT':
         #         TEN_BTC_VOL = 10*Decimal(data['lastPrice'])
         #         break
-
+        coin_to_delete = []
         if len(detected_coins_for_buy_signal) != 0:
             for data in detected_coins_for_buy_signal: #0>coinname 1>time 2>price 3>volume
                 if data[1] < datetime.datetime.now()-datetime.timedelta(minutes=5):
@@ -108,26 +114,31 @@ if __name__ == '__main__':
                             last_price = elem[2]
                             last_volume = elem[3]
                             break
-
+                    if data[0] in coin_to_delete: # Aynı coini 3 kere paylaşmasını engeller
+                        continue
                     share_me(data[0],first_price,first_volume,last_price,last_volume,"BUY")
+                    #shared = True
+                    #add shared coin info to list for delete
+                    coin_to_delete.append(data[0])
+        #delete shared coins
+        if len(coin_to_delete) != 0:
+            for elem in coin_to_delete:
+                detected_coins_for_buy_signal = remove_values_from_list(detected_coins_for_buy_signal,elem)
+            coin_to_delete.clear()
 
-                    #delete shared coin
-                    for elem in detected_coins_for_buy_signal:
-                        if elem[0] == data[0]:
-                            detected_coins_for_buy_signal.remove(elem)
-
-
-        if len(detected_coins_for_sell_signal) != 0: # Tespitinin üzerinden 5 dakika geçenleri siler
+        if len(detected_coins_for_sell_signal) != 0:
             for data in detected_coins_for_sell_signal: #0>coinname 1>time
                 if data[1] < datetime.datetime.now()-datetime.timedelta(minutes=5):
-                    detected_coins_for_sell_signal.remove(data)
+                    detected_coins_for_sell_signal.remove(data) # Tespitinin üzerinden 5 dakika geçenleri siler
 
             for data in detected_coins_for_sell_signal:
                 count = 0
+
                 for searching_data in detected_coins_for_sell_signal:
                     if data[0] == searching_data[0]:
                         count += 1
                 if count >= 3: # 3 veya daha fazla kez tespit edilenleri paylaşır
+
                     for elem in detected_coins_for_sell_signal:
                         if elem[0] == data[0]:
                             first_price = elem[2]
@@ -138,16 +149,23 @@ if __name__ == '__main__':
                             last_price = elem[2]
                             last_volume = elem[3]
                             break
-
+                    if data[0] in coin_to_delete: # Aynı coini 3 kere paylaşmasını engeller
+                        continue
                     share_me(data[0],first_price,first_volume,last_price,last_volume,"SELL")
+                    #shared = True
+                    #add shared coin info to list for delete
+                    coin_to_delete.append(data[0])
+        #delete shared coins
+        if len(coin_to_delete) != 0:
+            for elem in coin_to_delete:
+                detected_coins_for_sell_signal = remove_values_from_list(detected_coins_for_sell_signal,elem)
+            coin_to_delete.clear()
 
-                    #delete shared coin
-                    for elem in detected_coins_for_sell_signal:
-                        if elem[0] == data[0]:
-                            detected_coins_for_sell_signal.remove(elem)
-
-
-
+        # Kontrol amaçlı
+        # if shared == True:
+        #     print('detected_coins_for_buy_signal\n',detected_coins_for_buy_signal)
+        #     print('\ndetected_coins_for_sell_signal\n',detected_coins_for_sell_signal)
+        #     time.sleep(555555)
         for mem_elem in memory_for_USDT_BUSD_BTC:
             #print("mem_elem",mem_elem)
             for data_elem in datas:
