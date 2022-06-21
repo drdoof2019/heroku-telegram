@@ -75,8 +75,8 @@ if __name__ == '__main__':
 
             #print(i,")",elem['symbol'],elem['lastPrice'],elem['volume'])
             #i+=1
-    print(memory_for_USDT_BUSD_BTC)
-    time.sleep(9999)
+    # print(memory_for_USDT_BUSD_BTC)
+    # time.sleep(9999)
     cpass = configparser.RawConfigParser()
     cpass.read('config.data')
     if platform.system() == 'Windows':
