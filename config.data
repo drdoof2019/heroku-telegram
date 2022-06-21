@@ -1,0 +1,7 @@
+[cred]
+fiyat_oran = 0.5
+volume_oran = 0.8
+bekleme_suresi = 4
+silme_suresi = 15
+tespit_sayisi = 3
+

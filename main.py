@@ -4,6 +4,9 @@ import time
 import telegram_ops
 import datetime
 from decimal import Decimal
+import configparser
+import os, sys
+import platform
 # ZAMAN : https://stackoverflow.com/questions/57267862/delete-an-object-automatically-after-5-minutes
 
 def get_data():
@@ -56,24 +59,67 @@ def remove_values_from_list(the_list, val):
 
 if __name__ == '__main__':
     #shared = False
+    re="\033[1;31m"
+    gr="\033[1;32m"
+    cy="\033[1;36m"
     unwanted_symbols = ['SCBTC','GNOBTC','XVGBTC']
     detected_coins_for_sell_signal = []
     detected_coins_for_buy_signal = []
-
     datas = get_data()
     memory_for_USDT_BUSD_BTC = []
     for elem in datas:
+
         if elem['symbol'].endswith('USDT') or elem['symbol'].endswith('BUSD') or elem['symbol'].endswith('BTC'):
             if elem['symbol'] not in unwanted_symbols:
                 memory_for_USDT_BUSD_BTC.append([elem['symbol'],elem['lastPrice'],elem['volume']])
 
             #print(i,")",elem['symbol'],elem['lastPrice'],elem['volume'])
             #i+=1
-    yukselis_orani = 1.005
-    yukselis_orani = Decimal(yukselis_orani)
-    dusus_orani = 0.995
-    dusus_orani = Decimal(dusus_orani)
-    bekleme_suresi = 4 #saniye
+    print(memory_for_USDT_BUSD_BTC)
+    time.sleep(9999)
+    cpass = configparser.RawConfigParser()
+    cpass.read('config.data')
+    if platform.system() == 'Windows':
+        try:
+            fiyat_oran = Decimal(cpass['cred']['fiyat_oran'])
+            volume_oran = Decimal(cpass['cred']['volume_oran'])
+            bekleme_suresi = int(cpass['cred']['bekleme_suresi'])
+            silme_suresi = int(cpass['cred']['silme_suresi'])
+            tespit_sayisi = int(cpass['cred']['tespit_sayisi'])
+        except KeyError:
+            os.system('cls')
+            print(re+"[!] run python setup.py first !!\n")
+            sys.exit(1)
+    if platform.system() == 'Linux':
+        try:
+            fiyat_oran = Decimal(cpass['cred']['fiyat_oran'])
+            volume_oran = Decimal(cpass['cred']['volume_oran'])
+            bekleme_suresi = int(cpass['cred']['bekleme_suresi'])
+            silme_suresi = int(cpass['cred']['silme_suresi'])
+            tespit_sayisi = int(cpass['cred']['tespit_sayisi'])
+        except KeyError:
+            os.system('clear')
+            print(re+"[!] run python3 setup.py first !!\n")
+            sys.exit(1)
+    # # KULLANICI GİRDİLERİ
+    # fiyat_oran = 0.3
+    # volume_oran = 0.3
+    # bekleme_suresi = 4 #saniye
+    # tespit_sayisi = 3 #3 veya daha fazla kez tespit edilen coini paylaşır
+
+    yukselis_orani_for_fiyat = 1 + (1*fiyat_oran/100)
+    yukselis_orani_for_volume = 1 + (1*volume_oran/100)
+    dusus_orani_for_fiyat = 1-(1*fiyat_oran/100)
+    dusus_orani_for_volume = 1 - (1*volume_oran/100)
+    yukselis_orani_for_fiyat = Decimal(yukselis_orani_for_fiyat)
+    yukselis_orani_for_volume = Decimal(yukselis_orani_for_volume)
+    dusus_orani_for_fiyat = Decimal(dusus_orani_for_fiyat)
+    dusus_orani_for_volume = Decimal(dusus_orani_for_volume)
+    # print("yukselis_orani_for_fiyat",yukselis_orani_for_fiyat)
+    # print("dusus_orani_for_fiyat",dusus_orani_for_fiyat)
+    # print("yukselis_orani_for_volume",yukselis_orani_for_volume)
+    # print("dusus_orani_for_volume",dusus_orani_for_volume)
+    # time.sleep(999)
     while True:
         i=1
         datas.clear()
@@ -95,7 +141,7 @@ if __name__ == '__main__':
         coin_to_delete = []
         if len(detected_coins_for_buy_signal) != 0:
             for data in detected_coins_for_buy_signal: #0>coinname 1>time 2>price 3>volume
-                if data[1] < datetime.datetime.now()-datetime.timedelta(minutes=5):
+                if data[1] < datetime.datetime.now()-datetime.timedelta(minutes=silme_suresi):
                     detected_coins_for_buy_signal.remove(data) # Tespitinin üzerinden 5 dakika geçenleri siler
 
             for data in detected_coins_for_buy_signal:
@@ -137,7 +183,7 @@ if __name__ == '__main__':
                 for searching_data in detected_coins_for_sell_signal:
                     if data[0] == searching_data[0]:
                         count += 1
-                if count >= 3: # 3 veya daha fazla kez tespit edilenleri paylaşır
+                if count >= tespit_sayisi: # 3 veya daha fazla kez tespit edilenleri paylaşır
 
                     for elem in detected_coins_for_sell_signal:
                         if elem[0] == data[0]:
@@ -177,16 +223,16 @@ if __name__ == '__main__':
                 try:
                     if data_elem['symbol'] in mem_elem:
                         #print(data_elem['symbol'],data_elem['lastPrice'],mem_elem[1])
-                        if Decimal(data_elem['lastPrice'])*yukselis_orani < Decimal(mem_elem[1]): # 1%'den fazla düşmüş
+                        if Decimal(data_elem['lastPrice'])*yukselis_orani_for_fiyat < Decimal(mem_elem[1]): # 1%'den fazla düşmüş
                             fiyat_dustu = True
 
-                        if Decimal(data_elem['lastPrice'])*dusus_orani > Decimal(mem_elem[1]): # 1%'den fazla yükselmiş
+                        if Decimal(data_elem['lastPrice'])*dusus_orani_for_fiyat > Decimal(mem_elem[1]): # 1%'den fazla yükselmiş
                             fiyat_yukseldi = True
 
-                        if Decimal(data_elem['volume'])*yukselis_orani < Decimal(mem_elem[2]): # 1%'den fazla düşmüş
+                        if Decimal(data_elem['volume'])*yukselis_orani_for_volume < Decimal(mem_elem[2]): # 1%'den fazla düşmüş
                             volum_dustu = True
 
-                        if Decimal(data_elem['volume'])*dusus_orani > Decimal(mem_elem[2]): # 1%'den fazla yükselmiş
+                        if Decimal(data_elem['volume'])*dusus_orani_for_volume > Decimal(mem_elem[2]): # 1%'den fazla yükselmiş
                             volum_yukseldi = True
 
                         # if data_elem['symbol'] == 'BTCUSDT': # Suni sinyal için
